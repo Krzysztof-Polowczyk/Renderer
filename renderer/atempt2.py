@@ -9,18 +9,62 @@ class point:
         self.y = y
         self.z = z
 class triangle:
-    def __init__(self, p) -> None:
+    def __init__(self, p:list[point]) -> None:
         p1,p2,p3 = p
-        self.points = [
-            point(p1[0], p1[1], p1[2]), 
-            point(p2[0], p2[1], p2[2]), 
-            point(p3[0], p3[1], p3[2])
-        ]
+        if type(p1) == point:
+            self.points = [
+                p1,
+                p2,
+                p3
+            ]
+        else:
+        
+            self.points = [
+                point(p1[0], p1[1], p1[2]), 
+                point(p2[0], p2[1], p2[2]), 
+                point(p3[0], p3[1], p3[2])
+            ]
 class mesh:
-    def __init__(self, *tris) -> None:
+    def __init__(self, tris:list[triangle]) -> None:
         self.triangles = []
         for tri in tris:
-            self.triangles.append(triangle(tri))
+            self.triangles.append(tri)
+"""
+cube_mesh = mesh(
+    # SOUTH
+        [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]],
+        [[0.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 0.0, 0.0]],
+    # EAST
+        [[1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 1.0, 1.0]],
+        [[1.0, 0.0, 0.0], [1.0, 1.0, 1.0], [1.0, 0.0, 1.0]],
+    # NORTH
+        [[1.0, 0.0, 1.0], [1.0, 1.0, 1.0], [0.0, 1.0, 1.0]],
+        [[1.0, 0.0, 1.0], [0.0, 1.0, 1.0], [0.0, 0.0, 1.0]],
+    # WEST
+        [[0.0, 0.0, 1.0], [0.0, 1.0, 1.0], [0.0, 1.0, 0.0]],
+        [[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
+    # TOP
+        [[0.0, 1.0, 0.0], [0.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
+        [[0.0, 1.0, 0.0], [1.0, 1.0, 1.0], [1.0, 1.0, 0.0]],
+    # BOTTOM
+        [[1.0, 0.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]],
+        [[1.0, 0.0, 1.0], [0.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
+)
+"""
+
+with open("X_wing.obj", 'r') as file:
+    points = [point(0,0,0)]
+    triangles = []
+    for line in file:
+        line = line.strip()
+        if line[0] == "v":
+            cords = line[2:].split(" ")
+            points.append(point(float(cords[0]), float(cords[1]), float(cords[2]) ))
+        if line[0] == "f":
+            ps = line[2:].split(" ")
+            triangles.append(triangle([points[int(ps[0])], points[int(ps[1])], points[int(ps[2])]]))
+    cube_mesh = mesh(triangles)     
+    
 
 H = 800
 W = 800
@@ -52,26 +96,7 @@ projectiom_matrix = [
     [0,0,-Zn*q,0]
 ]
 
-cube_mesh = mesh(
-    # SOUTH
-        [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]],
-        [[0.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 0.0, 0.0]],
-    # EAST
-        [[1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 1.0, 1.0]],
-        [[1.0, 0.0, 0.0], [1.0, 1.0, 1.0], [1.0, 0.0, 1.0]],
-    # NORTH
-        [[1.0, 0.0, 1.0], [1.0, 1.0, 1.0], [0.0, 1.0, 1.0]],
-        [[1.0, 0.0, 1.0], [0.0, 1.0, 1.0], [0.0, 0.0, 1.0]],
-    # WEST
-        [[0.0, 0.0, 1.0], [0.0, 1.0, 1.0], [0.0, 1.0, 0.0]],
-        [[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
-    # TOP
-        [[0.0, 1.0, 0.0], [0.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
-        [[0.0, 1.0, 0.0], [1.0, 1.0, 1.0], [1.0, 1.0, 0.0]],
-    # BOTTOM
-        [[1.0, 0.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]],
-        [[1.0, 0.0, 1.0], [0.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
-)
+
 
   
 pygame.init() 
@@ -120,7 +145,10 @@ while not exit:
     matRotX[3][3] = 1
     
     #project 
-    for tri in cube_mesh.triangles:
+    for tri in cube_mesh.triangles[1:]:
+        
+
+
         triRotatedZ = triangle([[0,0,0],[0,0,0],[0,0,0]])
 
         triRotatedZ.points[0] = miltiply_matrix(tri.points[0], matRotZ)
@@ -129,18 +157,24 @@ while not exit:
 			# Rotate in X-Axis
         triRotatedXZ = triangle([[0,0,0],[0,0,0],[0,0,0]])
 
+ 
+
         triRotatedXZ.points[0] = miltiply_matrix(triRotatedZ.points[0], matRotX)
         triRotatedXZ.points[1] = miltiply_matrix(triRotatedZ.points[1], matRotX)
         triRotatedXZ.points[2] = miltiply_matrix(triRotatedZ.points[2], matRotX)
-
-
+        
+        
 
         
         tritrans = copy.deepcopy(triRotatedXZ)
+
+
         
-        tritrans.points[0].z = triRotatedXZ.points[0].z + 3
-        tritrans.points[1].z = triRotatedXZ.points[1].z + 3
-        tritrans.points[2].z = triRotatedXZ.points[2].z + 3
+        
+        tritrans.points[0].z = triRotatedXZ.points[0].z + 8
+        tritrans.points[1].z = triRotatedXZ.points[1].z + 8
+        tritrans.points[2].z = triRotatedXZ.points[2].z + 8
+        #print([tritrans.points[0].x, tritrans.points[0].y, tritrans.points[0].z], [tritrans.points[1].x, tritrans.points[1].y, tritrans.points[1].z], [tritrans.points[2].x, tritrans.points[2].y, tritrans.points[2].z])
 
         line1 = [
             tritrans.points[1].x - tritrans.points[0].x, 
@@ -152,6 +186,8 @@ while not exit:
             tritrans.points[2].y - tritrans.points[0].y, 
             tritrans.points[2].z - tritrans.points[0].z
             ]
+        #print(line1[0],line1[1],line1[2])
+        #print(line2[0],line2[1],line2[2])
 
         normal = [
             (line1[1] * line2[2]) - (line1[2] * line2[1]),
@@ -159,12 +195,13 @@ while not exit:
             (line1[0] * line2[1]) - (line1[1] * line2[0])
                   ]
         
-        
+        #print(normal[0],normal[1],normal[2], "lll")
         l = math.sqrt((normal[0]*normal[0]) + (normal[1]*normal[1]) + (normal[2]*normal[2]))
-        normal[0] = normal[0] /l
-        normal[1] = normal[1]/ l
-        normal[2] = normal[2] /l
-
+        if l:
+            
+            normal[0] = normal[0] /l
+            normal[1] = normal[1]/ l
+            normal[2] = normal[2] /l
         dot = (normal[0] * (tritrans.points[0].x- camera.x)) + (normal[1] * (tritrans.points[0].y- camera.y)) + (normal[2] * (tritrans.points[0].z- camera.z))
         
         if dot < 0:
@@ -177,12 +214,18 @@ while not exit:
                 miltiply_matrix(tritrans.points[1], projectiom_matrix),
                 miltiply_matrix(tritrans.points[2], projectiom_matrix)
                 ]
-        
+            
             pygame.draw.polygon(canvas, (0, 0, abs(130*light_dot+20)), 
-                [
+            [
                 ((triproj[0].x + 1) * W/2, (triproj[0].y + 1) * W/2),
                 ((triproj[1].x + 1) * W/2, (triproj[1].y + 1) * W/2),
                 ((triproj[2].x + 1) * W/2, (triproj[2].y + 1) * W/2)
-                ])
+            ])
+            pygame.draw.polygon(canvas, (255, 255, 255), 
+            [
+                ((triproj[0].x + 1) * W/2, (triproj[0].y + 1) * W/2),
+                ((triproj[1].x + 1) * W/2, (triproj[1].y + 1) * W/2),
+                ((triproj[2].x + 1) * W/2, (triproj[2].y + 1) * W/2)
+            ],1)
     
     pygame.display.update() 
