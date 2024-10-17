@@ -85,6 +85,7 @@ exit = False
 
 fTheta = 0 
 camera = point(0,0,0)
+light_direction = point(0,0,-1)
 
 while not exit: 
     canvas.fill((0,0,1))
@@ -158,26 +159,30 @@ while not exit:
             (line1[0] * line2[1]) - (line1[1] * line2[0])
                   ]
         
+        
         l = math.sqrt((normal[0]*normal[0]) + (normal[1]*normal[1]) + (normal[2]*normal[2]))
         normal[0] = normal[0] /l
         normal[1] = normal[1]/ l
         normal[2] = normal[2] /l
 
         dot = (normal[0] * (tritrans.points[0].x- camera.x)) + (normal[1] * (tritrans.points[0].y- camera.y)) + (normal[2] * (tritrans.points[0].z- camera.z))
+        
         if dot < 0:
-
+            l = math.sqrt((light_direction.x*light_direction.x) + (light_direction.y*light_direction.y) + (light_direction.z*light_direction.z))
+            light_direction.x /= l; light_direction.y /= l; light_direction.z /= l
             
+            light_dot = (normal[0] * light_direction.x) + (normal[1] * light_direction.y) + (normal[2]* light_direction.z)
             triproj = [
                 miltiply_matrix(tritrans.points[0], projectiom_matrix),
                 miltiply_matrix(tritrans.points[1], projectiom_matrix),
                 miltiply_matrix(tritrans.points[2], projectiom_matrix)
                 ]
         
-            pygame.draw.polygon(canvas, (255, 0, 0), 
+            pygame.draw.polygon(canvas, (0, 0, abs(130*light_dot+20)), 
                 [
                 ((triproj[0].x + 1) * W/2, (triproj[0].y + 1) * W/2),
                 ((triproj[1].x + 1) * W/2, (triproj[1].y + 1) * W/2),
                 ((triproj[2].x + 1) * W/2, (triproj[2].y + 1) * W/2)
-                ], 1)
+                ])
     
     pygame.display.update() 
