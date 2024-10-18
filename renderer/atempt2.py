@@ -29,28 +29,6 @@ class mesh:
         self.triangles = []
         for tri in tris:
             self.triangles.append(tri)
-"""
-cube_mesh = mesh(
-    # SOUTH
-        [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]],
-        [[0.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 0.0, 0.0]],
-    # EAST
-        [[1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [1.0, 1.0, 1.0]],
-        [[1.0, 0.0, 0.0], [1.0, 1.0, 1.0], [1.0, 0.0, 1.0]],
-    # NORTH
-        [[1.0, 0.0, 1.0], [1.0, 1.0, 1.0], [0.0, 1.0, 1.0]],
-        [[1.0, 0.0, 1.0], [0.0, 1.0, 1.0], [0.0, 0.0, 1.0]],
-    # WEST
-        [[0.0, 0.0, 1.0], [0.0, 1.0, 1.0], [0.0, 1.0, 0.0]],
-        [[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]],
-    # TOP
-        [[0.0, 1.0, 0.0], [0.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
-        [[0.0, 1.0, 0.0], [1.0, 1.0, 1.0], [1.0, 1.0, 0.0]],
-    # BOTTOM
-        [[1.0, 0.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]],
-        [[1.0, 0.0, 1.0], [0.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
-)
-"""
 
 with open("X_wing.obj", 'r') as file:
     points = [point(0,0,0)]
@@ -66,8 +44,8 @@ with open("X_wing.obj", 'r') as file:
     cube_mesh = mesh(triangles)     
     
 
-H = 800
-W = 800
+H = 500
+W = 500
 FOV = 90
 
 Zn = 0.1
@@ -103,16 +81,24 @@ pygame.init()
 
 # CREATING CANVAS 
 canvas = pygame.display.set_mode((W, W)) 
-  
+
 # TITLE OF CANVAS 
 pygame.display.set_caption("My Board") 
 exit = False
+clock = pygame.time.Clock()
+
 
 fTheta = 0 
 camera = point(0,0,0)
 light_direction = point(0,0,-1)
-
 while not exit: 
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False          
+
+    clock.tick()
+    print("FPS :", clock.get_fps())
+
     canvas.fill((0,0,1))
 
     fTheta += 0.001
