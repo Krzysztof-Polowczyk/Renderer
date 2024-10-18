@@ -143,10 +143,10 @@ while not exit:
     matRotX[2][1] = -math.sin(fTheta * 0.5)
     matRotX[2][2] = math.cos(fTheta * 0.5)
     matRotX[3][3] = 1
-    
+    tris_for_projection = []
     #project 
     for tri in cube_mesh.triangles[1:]:
-        
+       
 
 
         triRotatedZ = triangle([[0,0,0],[0,0,0],[0,0,0]])
@@ -212,16 +212,20 @@ while not exit:
             triproj = [
                 miltiply_matrix(tritrans.points[0], projectiom_matrix),
                 miltiply_matrix(tritrans.points[1], projectiom_matrix),
-                miltiply_matrix(tritrans.points[2], projectiom_matrix)
+                miltiply_matrix(tritrans.points[2], projectiom_matrix),
+                light_dot
                 ]
-            
-            pygame.draw.polygon(canvas, (0, 0, abs(130*light_dot+20)), 
+            tris_for_projection.append(triproj)
+    tris_for_projection = sorted(tris_for_projection, key = lambda x: (x[0].z + x[1].z + x[2].z) / 3, reverse=True)
+    for triproj in tris_for_projection:
+       
+        pygame.draw.polygon(canvas, (0, 0, abs(130*triproj[3]+20)), 
             [
                 ((triproj[0].x + 1) * W/2, (triproj[0].y + 1) * W/2),
                 ((triproj[1].x + 1) * W/2, (triproj[1].y + 1) * W/2),
                 ((triproj[2].x + 1) * W/2, (triproj[2].y + 1) * W/2)
             ])
-            pygame.draw.polygon(canvas, (255, 255, 255), 
+        pygame.draw.polygon(canvas, (255, 255, 255), 
             [
                 ((triproj[0].x + 1) * W/2, (triproj[0].y + 1) * W/2),
                 ((triproj[1].x + 1) * W/2, (triproj[1].y + 1) * W/2),
