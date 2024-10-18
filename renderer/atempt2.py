@@ -30,7 +30,7 @@ class mesh:
         for tri in tris:
             self.triangles.append(tri)
 
-with open("X_wing.obj", 'r') as file:
+with open("cube234.obj", 'r') as file:
     points = [point(0,0,0)]
     triangles = []
     for line in file:
@@ -131,7 +131,7 @@ while not exit:
     matRotX[3][3] = 1
     tris_for_projection = []
     #project 
-    for tri in cube_mesh.triangles[1:]:
+    for tri in cube_mesh.triangles:
        
 
 
@@ -157,9 +157,9 @@ while not exit:
 
         
         
-        tritrans.points[0].z = triRotatedXZ.points[0].z + 8
-        tritrans.points[1].z = triRotatedXZ.points[1].z + 8
-        tritrans.points[2].z = triRotatedXZ.points[2].z + 8
+        tritrans.points[0].z = triRotatedXZ.points[0].z + 6
+        tritrans.points[1].z = triRotatedXZ.points[1].z + 6
+        tritrans.points[2].z = triRotatedXZ.points[2].z + 6
         #print([tritrans.points[0].x, tritrans.points[0].y, tritrans.points[0].z], [tritrans.points[1].x, tritrans.points[1].y, tritrans.points[1].z], [tritrans.points[2].x, tritrans.points[2].y, tritrans.points[2].z])
 
         line1 = [
@@ -172,22 +172,18 @@ while not exit:
             tritrans.points[2].y - tritrans.points[0].y, 
             tritrans.points[2].z - tritrans.points[0].z
             ]
-        #print(line1[0],line1[1],line1[2])
-        #print(line2[0],line2[1],line2[2])
 
         normal = [
             (line1[1] * line2[2]) - (line1[2] * line2[1]),
             (line1[2] * line2[0]) - (line1[0] * line2[2]),
             (line1[0] * line2[1]) - (line1[1] * line2[0])
                   ]
-        
-        #print(normal[0],normal[1],normal[2], "lll")
         l = math.sqrt((normal[0]*normal[0]) + (normal[1]*normal[1]) + (normal[2]*normal[2]))
-        if l:
-            
-            normal[0] = normal[0] /l
-            normal[1] = normal[1]/ l
-            normal[2] = normal[2] /l
+        
+        normal[0] = normal[0] /l
+        normal[1] = normal[1]/ l
+        normal[2] = normal[2] /l
+
         dot = (normal[0] * (tritrans.points[0].x- camera.x)) + (normal[1] * (tritrans.points[0].y- camera.y)) + (normal[2] * (tritrans.points[0].z- camera.z))
         
         if dot < 0:
@@ -205,12 +201,13 @@ while not exit:
     tris_for_projection = sorted(tris_for_projection, key = lambda x: (x[0].z + x[1].z + x[2].z) / 3, reverse=True)
     for triproj in tris_for_projection:
        
-        pygame.draw.polygon(canvas, (0, 0, abs(130*triproj[3]+20)), 
+        pygame.draw.polygon(canvas, (0, 0, abs(130*triproj[3]+90)), 
             [
                 ((triproj[0].x + 1) * W/2, (triproj[0].y + 1) * W/2),
                 ((triproj[1].x + 1) * W/2, (triproj[1].y + 1) * W/2),
                 ((triproj[2].x + 1) * W/2, (triproj[2].y + 1) * W/2)
             ])
+        
         pygame.draw.polygon(canvas, (255, 255, 255), 
             [
                 ((triproj[0].x + 1) * W/2, (triproj[0].y + 1) * W/2),
