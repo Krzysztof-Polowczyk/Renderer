@@ -30,7 +30,7 @@ class mesh:
         for tri in tris:
             self.triangles.append(tri)
 
-with open("cube234.obj", 'r') as file:
+with open("X_wing.obj", 'r') as file:
     points = [point(0,0,0)]
     triangles = []
     for line in file:
@@ -97,11 +97,11 @@ while not exit:
             run = False          
 
     clock.tick()
-    print("FPS :", clock.get_fps())
+    #print("FPS :", clock.get_fps())
 
     canvas.fill((0,0,1))
 
-    fTheta += 0.001
+    fTheta += 0.005
     matRotZ = [
         [0,0,0,0],
         [0,0,0,0],
@@ -207,12 +207,13 @@ while not exit:
                 ((triproj[1].x + 1) * W/2, (triproj[1].y + 1) * W/2),
                 ((triproj[2].x + 1) * W/2, (triproj[2].y + 1) * W/2)
             ])
-        
+        """
         pygame.draw.polygon(canvas, (255, 255, 255), 
             [
                 ((triproj[0].x + 1) * W/2, (triproj[0].y + 1) * W/2),
                 ((triproj[1].x + 1) * W/2, (triproj[1].y + 1) * W/2),
                 ((triproj[2].x + 1) * W/2, (triproj[2].y + 1) * W/2)
             ],1)
+        """
     
     pygame.display.update() 
