@@ -1,48 +1,15 @@
-import pygame 
-import math
-import numpy as np
-import copy
+import pygame, math, numpy as np, copy
 
-class point:
-    def __init__(self, x,y,z) -> None:
-        self.x = x
-        self.y = y
-        self.z = z
+
 class triangle:
-    def __init__(self, p:list[point]) -> None:
+    def __init__(self, p:list[np.ndarray]) -> None:
         p1,p2,p3 = p
-        if type(p1) == point:
-            self.points = [
-                p1,
-                p2,
-                p3
-            ]
-        else:
-        
-            self.points = [
-                point(p1[0], p1[1], p1[2]), 
-                point(p2[0], p2[1], p2[2]), 
-                point(p3[0], p3[1], p3[2])
-            ]
-class mesh:
-    def __init__(self, tris:list[triangle]) -> None:
-        self.triangles = []
-        for tri in tris:
-            self.triangles.append(tri)
-
-with open("X_wing.obj", 'r') as file:
-    points = [point(0,0,0)]
-    triangles = []
-    for line in file:
-        line = line.strip()
-        if line[0] == "v":
-            cords = line[2:].split(" ")
-            points.append(point(float(cords[0]), float(cords[1]), float(cords[2]) ))
-        if line[0] == "f":
-            ps = line[2:].split(" ")
-            triangles.append(triangle([points[int(ps[0])], points[int(ps[1])], points[int(ps[2])]]))
-    cube_mesh = mesh(triangles)     
-    
+        self.points = [
+            p1,
+            p2,
+            p3
+        ]
+mesh = []
 
 H = 500
 W = 500
@@ -55,28 +22,33 @@ a = W/H
 f = 1/math.tan(math.radians(FOV/2))
 q = Zf / (Zf - Zn)
 
+with open("cube234.obj", 'r') as file:
+    points = []
+    for line in file:
+        
+        line = line.strip()
+        points.append(np.array(list(map(float, line[2:].split())))) if line[0] == "v" else mesh.append(triangle(list(map(lambda x: points[int(x)-1], line[2:].split()))))
+            
+
+
+
 def miltiply_matrix(i, m):
-    o = point(0,0,0)
-    o.x = (i.x * m[0][0]) + (i.y * m[1][0]) + (i.z * m[2][0]) + m[3][0]
-    o.y = (i.x * m[0][1]) + (i.y * m[1][1]) + (i.z * m[2][1]) + m[3][1]
-    o.z = (i.x * m[0][2]) + (i.y * m[1][2]) + (i.z * m[2][2]) + m[3][2]
-    w  =  (i.x * m[0][3]) + (i.y * m[1][3]) + (i.z * m[2][3]) + m[3][3]
+    local_i = np.matmul(np.array([i[0], i[1], i[2], 0]),m)
 
-    if w != 0.0:
-        o.x /= w; o.y /= w; o.z /= w
+    if local_i[3] == 0:
+        local_i[3] = 1
+     
+    return np.array([local_i[0]/local_i[3], local_i[1]/local_i[3], local_i[2]/local_i[3]])
 
-    return o
 
-projectiom_matrix = [
+    
+projectiom_matrix = np.array([
     [a*f, 0, 0, 0],
     [0, f, 0, 0],
     [0,0,q,1],
     [0,0,-Zn*q,0]
-]
+])
 
-
-
-  
 pygame.init() 
 
 # CREATING CANVAS 
@@ -88,9 +60,9 @@ exit = False
 clock = pygame.time.Clock()
 
 
-fTheta = 0 
-camera = point(0,0,0)
-light_direction = point(0,0,-1)
+fTheta = 0
+camera = np.array([0,0,0])
+light_direction = np.array([0,0,-1])
 while not exit: 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -101,13 +73,13 @@ while not exit:
 
     canvas.fill((0,0,1))
 
-    fTheta += 0.005
-    matRotZ = [
+    fTheta += 0.001
+    matRotZ = np.array([
         [0,0,0,0],
         [0,0,0,0],
         [0,0,0,0],
         [0,0,0,0],
-    ]
+    ])
     matRotX = [
         [0,0,0,0],
         [0,0,0,0],
@@ -131,7 +103,7 @@ while not exit:
     matRotX[3][3] = 1
     tris_for_projection = []
     #project 
-    for tri in cube_mesh.triangles:
+    for tri in mesh:
        
 
 
@@ -140,7 +112,7 @@ while not exit:
         triRotatedZ.points[0] = miltiply_matrix(tri.points[0], matRotZ)
         triRotatedZ.points[1] = miltiply_matrix(tri.points[1], matRotZ)
         triRotatedZ.points[2] = miltiply_matrix(tri.points[2], matRotZ)
-			# Rotate in X-Axis
+		#Rotate in X-Axis
         triRotatedXZ = triangle([[0,0,0],[0,0,0],[0,0,0]])
 
  
@@ -154,19 +126,17 @@ while not exit:
         
         tritrans = copy.deepcopy(triRotatedXZ)
 
-
-        
-        
-        tritrans.points[0].z = triRotatedXZ.points[0].z + 6
-        tritrans.points[1].z = triRotatedXZ.points[1].z + 6
-        tritrans.points[2].z = triRotatedXZ.points[2].z + 6
-        #print([tritrans.points[0].x, tritrans.points[0].y, tritrans.points[0].z], [tritrans.points[1].x, tritrans.points[1].y, tritrans.points[1].z], [tritrans.points[2].x, tritrans.points[2].y, tritrans.points[2].z])
+        # ofseting triangle on z axses
+        tritrans.points[0][2] = triRotatedXZ.points[0][2] + 10
+        tritrans.points[1][2] = triRotatedXZ.points[1][2] + 10
+        tritrans.points[2][2] = triRotatedXZ.points[2][2] + 10
 
         line1 = [
             tritrans.points[1].x - tritrans.points[0].x, 
             tritrans.points[1].y - tritrans.points[0].y,
             tritrans.points[1].z - tritrans.points[0].z
             ]
+        
         line2 = [
             tritrans.points[2].x - tritrans.points[0].x, 
             tritrans.points[2].y - tritrans.points[0].y, 
